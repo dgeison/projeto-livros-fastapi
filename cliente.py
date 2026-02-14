@@ -1,0 +1,79 @@
+import requests
+import json
+
+API_URL = "http://127.0.0.1:8000"
+
+
+def tratar_resposta(resp: requests.Response):
+    """Imprimir de forma amigável resposta da API."""
+    try:
+        data = resp.json()
+    except ValueError:
+        print(f"\nStatus: {resp.status_code}")
+        print("Resposta sem JSON.")
+        print(resp.text)
+        return
+
+    if resp.status_code >= 400:
+        print(f"\n❌ Erro ({resp.status_code})")
+    else:
+        print(f"✅")
+    print(json.dumps(data, indent=4, ensure_ascii=False))
+
+
+def listar_livros():
+    resp = requests.get(f"{API_URL}/livros")
+    print("\n📚 Listar Livros:")
+    tratar_resposta(resp)
+
+
+def obter_livro():
+    livro_uuid = input("🔍 UUID do livro: ").strip()
+    resp = requests.get(f"{API_URL}/livros/{livro_uuid}")
+    print("\n📖 Detalhes do Livro:")
+    tratar_resposta(resp)
+
+
+def adicionar_livro():
+    print("\n✏️ Digite os dados do novo livro:")
+    autor = input("👤 Autor: ")
+    titulo = input("📕 Título: ")
+    editora = input("🏢 Editora: ")
+    ano = input("📅 Ano de publicação: ")
+
+    payload = {
+        'autor': autor,
+        'titulo': titulo,
+        'editora': editora,
+        'ano': ano,
+    }
+    resp = requests.post(f"{API_URL}/livros", json=payload)
+    print("\n➕ Livro adicionado:")
+    tratar_resposta(resp)
+    
+
+
+
+def menu():
+    while True:
+        print("\n📚 === CLIENTE API DE LIVROS === 📚")
+        print("1️⃣  Listar Livros")
+        print("2️⃣  Obter livro por UUID")
+        print("3️⃣  Adicionar livro")
+        print("0️⃣  Sair")
+
+        opcao = input("\n🎯 Escolha a opção: ").strip()
+
+        if opcao == "1":
+            listar_livros()
+        elif opcao == "2":
+            obter_livro()
+        elif opcao == "3":
+            adicionar_livro()
+        elif opcao == "0":
+            print("\n👋 Encerrando cliente...")
+            break
+
+
+if __name__ == "__main__":
+    menu()
